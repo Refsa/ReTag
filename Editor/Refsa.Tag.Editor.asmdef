@@ -1,0 +1,17 @@
+{
+    "name": "Refsa.Tag.Editor",
+    "references": [
+        "GUID:d22a80c0b132de64695ea6424c0891be"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

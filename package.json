@@ -1,0 +1,17 @@
+{
+    "name": "com.refsa.retag",
+    "displayName": "ReTag",
+    "version": "1.0.0",
+    "unity": "2019.3",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Refsa/ReTag.git",
+        "revision": ""
+    },
+    "description": "A tag system for GameObjects",
+    "keywords": [
+        "tag",
+        "tags"
+    ],
+    "dependencies": {}
+}
