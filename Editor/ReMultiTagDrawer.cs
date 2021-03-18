@@ -1,15 +1,13 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
-#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditorInternal;
+using UnityEngine;
+using UnityEngine.UIElements;
 
-[CustomEditor(typeof(ReTags))]
-[CanEditMultipleObjects]
-public class ReTagsInspector : Editor
+[CustomPropertyDrawer(typeof(ReMultiTag))]
+public class ReMultiTagDrawer : PropertyDrawer
 {
     SerializedProperty _property;
     ReorderableList _list;
@@ -20,19 +18,29 @@ public class ReTagsInspector : Editor
     int toRemove = -1;
     ReTag toAdd = null;
 
-    void OnEnable()
+    bool tagsSetup = false;
+
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        _property = serializedObject.FindProperty("setTags");
-        _list = new ReorderableList(serializedObject, _property, true, true, true, true)
+        return (property.FindPropertyRelative("Tags").arraySize + 3) * EditorGUIUtility.singleLineHeight;
+    }
+
+    void Setup(SerializedProperty property)
+    {
+        _property = property.FindPropertyRelative("Tags");
+        _list = new ReorderableList(_property.serializedObject, _property, true, true, true, true)
         {
             drawHeaderCallback = DrawListHeader,
             drawElementCallback = DrawListElement,
             onAddDropdownCallback = AddDropdown,
         };
+    }
 
+    void SetupTags()
+    {
         tags = new List<ReTag>();
         tagMenuPaths = new List<string>();
-        var guids = AssetDatabase.FindAssets("t:Tag");
+        var guids = AssetDatabase.FindAssets("t:ReTag");
         foreach (var guid in guids)
         {
             var path = AssetDatabase.GUIDToAssetPath(guid);
@@ -42,77 +50,20 @@ public class ReTagsInspector : Editor
             var parentFolder = Directory.GetParent(path);
             tagMenuPaths.Add(parentFolder.Name + "/" + tag.GetTag.name);
         }
+
+        tagsSetup = true;
     }
 
-    void AddDropdown(Rect buttonRect, ReorderableList list)
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        var tagsDropdown = new GenericMenu();
-        for (int i = 0; i < tags.Count; i++)
-        {
-            var tag = tags[i];
-            tagsDropdown.AddItem(new GUIContent(tagMenuPaths[i]), false, () => toAdd = tag);
-        }
-        tagsDropdown.ShowAsContext();
-    }
+        property.serializedObject.Update();
+        if (!tagsSetup) SetupTags();
+        Setup(property);
 
-    bool CanAddListElement(ReorderableList list)
-    {
-        if (toAdd != null)
-        {
-            _property.InsertArrayElementAtIndex(_property.arraySize);
+        Rect listRect = new Rect(position);
+        //listRect.height -= EditorGUIUtility.singleLineHeight * 2f;
 
-            var subProp = _property.GetArrayElementAtIndex(_property.arraySize - 1);
-            subProp.objectReferenceValue = toAdd;
-
-            toAdd = null;
-            return true;
-        }
-
-        return false;
-    }
-
-    bool RemoveListElement(ReorderableList list)
-    {
-        if (toRemove != -1)
-        {
-            _property.DeleteArrayElementAtIndex(toRemove);
-            _property.DeleteArrayElementAtIndex(toRemove);
-            toRemove = -1;
-            return true;
-        }
-
-        return false;
-    }
-
-    void DrawListHeader(Rect rect)
-    {
-        GUI.Label(rect, "Tags");
-    }
-
-    void DrawListElement(Rect rect, int index, bool isActive, bool isFocused)
-    {
-        var item = _property.GetArrayElementAtIndex(index);
-        var propRect = new Rect(rect);
-        propRect.width -= 20f;
-
-        EditorGUI.PropertyField(propRect, item);
-
-        var removeRect = new Rect(rect);
-        removeRect.width = 20f;
-        removeRect.position += Vector2.right * propRect.width;
-
-        if (GUI.Button(removeRect, "X", EditorStyles.miniButton))
-        {
-            toRemove = index;
-            Repaint();
-        }
-    }
-
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-        EditorGUILayout.Space();
-        _list.DoLayoutList();
+        _list.DoList(listRect);
 
         HandleDragAndDrop();
 
@@ -122,12 +73,14 @@ public class ReTagsInspector : Editor
             _property.DeleteArrayElementAtIndex(toRemove);
             toRemove = -1;
         }
+
         if (toAdd != null)
         {
             AddTag(toAdd);
             toAdd = null;
         }
-        serializedObject.ApplyModifiedProperties();
+
+        property.serializedObject.ApplyModifiedProperties();
     }
 
     void AddTag(ReTag tag)
@@ -151,6 +104,7 @@ public class ReTagsInspector : Editor
                 {
                     DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
                 }
+
                 break;
             case EventType.DragPerform:
                 if (DragAndDrop.objectReferences.All(e => e is ReTag))
@@ -159,10 +113,46 @@ public class ReTagsInspector : Editor
                     {
                         AddTag(obj as ReTag);
                     }
+
                     DragAndDrop.AcceptDrag();
                 }
+
                 break;
         }
     }
+
+    void DrawListHeader(Rect rect)
+    {
+        GUI.Label(rect, "Tags");
+    }
+
+    void DrawListElement(Rect rect, int index, bool isActive, bool isFocused)
+    {
+        var item = _property.GetArrayElementAtIndex(index);
+        var propRect = new Rect(rect);
+        propRect.width -= 20f;
+
+        EditorGUI.PropertyField(propRect, item);
+
+        var removeRect = new Rect(rect);
+        removeRect.width = 20f;
+        removeRect.position += Vector2.right * propRect.width;
+
+        if (GUI.Button(removeRect, "X", EditorStyles.miniButton))
+        {
+            toRemove = index;
+        }
+    }
+
+    void AddDropdown(Rect buttonRect, ReorderableList list)
+    {
+        var tagsDropdown = new GenericMenu();
+        for (int i = 0; i < tags.Count; i++)
+        {
+            var tag = tags[i];
+            tagsDropdown.AddItem(new GUIContent(tagMenuPaths[i]), false, () => toAdd = tag);
+        }
+
+        tagsDropdown.ShowAsContext();
+    }
 }
-#endif

@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+﻿/*using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
 #if UNITY_EDITOR
 [CustomEditor(typeof(ReTag))]
-public class TagInspector : Editor
+public class ReTagInspector : Editor
 {
     bool isUnique;
     List<string> sharedNames;
@@ -51,4 +51,4 @@ public class TagInspector : Editor
         }
     }
 }
-#endif
+#endif*/

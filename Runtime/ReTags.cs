@@ -5,34 +5,35 @@ using UnityEngine;
 [DefaultExecutionOrder(-1000)]
 public class ReTags : MonoBehaviour
 {
-    [SerializeField] List<ReTag> setTags;
-    HashSet<ReTagIdentifier> tags;
+    [SerializeField] ReMultiTag tags;
+    
+    HashSet<ReTagIdentifier> cachedTags;
 
     void Awake()
     {
-        tags = new HashSet<ReTagIdentifier>();
+        cachedTags = new HashSet<ReTagIdentifier>();
 
-        if (setTags != null)
+        if (tags.Tags != null)
         {
-            foreach (var t in setTags)
+            foreach (var t in tags.Tags)
             {
-                if (!tags.Contains(t.GetTag))
+                if (!cachedTags.Contains(t.GetTag))
                 {
-                    tags.Add(t.GetTag);
+                    cachedTags.Add(t.GetTag);
                 }
             }
         }
     }
 
-    public bool HasTag(string tag) => tags.Contains(tag);
-    public bool SetTag(string tag) => tags.Add(tag);
-    public bool RemoveTag(string tag) => tags.Remove(tag);
+    public bool HasTag(string tag) => cachedTags.Contains(tag);
+    public bool SetTag(string tag) => cachedTags.Add(tag);
+    public bool RemoveTag(string tag) => cachedTags.Remove(tag);
 
-    public bool HasTag(ReTagIdentifier tag) => tags.Contains(tag);
-    public bool SetTag(ReTagIdentifier tag) => tags.Add(tag);
-    public bool RemoveTag(ReTagIdentifier tag) => tags.Remove(tag);
+    public bool HasTag(ReTagIdentifier tag) => cachedTags.Contains(tag);
+    public bool SetTag(ReTagIdentifier tag) => cachedTags.Add(tag);
+    public bool RemoveTag(ReTagIdentifier tag) => cachedTags.Remove(tag);
 
-    public bool HasTag(ReTag tag) => tags.Contains(tag.GetTag);
-    public bool SetTag(ReTag tag) => tags.Add(tag.GetTag);
-    public bool RemoveTag(ReTag tag) => tags.Remove(tag.GetTag);
+    public bool HasTag(ReTag tag) => cachedTags.Contains(tag.GetTag);
+    public bool SetTag(ReTag tag) => cachedTags.Add(tag.GetTag);
+    public bool RemoveTag(ReTag tag) => cachedTags.Remove(tag.GetTag);
 }
