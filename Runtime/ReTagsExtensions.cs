@@ -62,6 +62,23 @@ public static class ReTagsExtensions
         return tagsCache[target].HasTag(tag);
     }
 
+    public static bool HasTag(this GameObject target, ReMultiTag tags)
+    {
+        if (!tagsCache.TryGetValue(target, out var _))
+        {
+            if (target.GetComponent<ReTags>() is ReTags _tags)
+            {
+                tagsCache.Add(target, _tags);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return tagsCache[target].HasTags(tags);
+    }
+
     #endregion
 
     #region Set Tag

@@ -22,12 +22,15 @@ public class ReMultiTagDrawer : PropertyDrawer
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        return (property.FindPropertyRelative("Tags").arraySize + 3) * EditorGUIUtility.singleLineHeight;
+        Setup(property);
+
+        return
+            EditorGUIUtility.singleLineHeight + _list.GetHeight();
     }
 
     void Setup(SerializedProperty property)
     {
-        _property = property.FindPropertyRelative("Tags");
+        _property = property.FindPropertyRelative(nameof(ReMultiTag.Tags));
         _list = new ReorderableList(_property.serializedObject, _property, true, true, true, true)
         {
             drawHeaderCallback = DrawListHeader,
@@ -58,12 +61,20 @@ public class ReMultiTagDrawer : PropertyDrawer
     {
         property.serializedObject.Update();
         if (!tagsSetup) SetupTags();
-        Setup(property);
+
+        Rect labelRect = new Rect(position.position,
+            new Vector2(position.width * 0.5f, EditorGUIUtility.singleLineHeight));
+
+        Rect toggleRect = new Rect(labelRect);
+        toggleRect.position += new Vector2(position.width * 0.5f, EditorGUIUtility.singleLineHeight);
 
         Rect listRect = new Rect(position);
-        //listRect.height -= EditorGUIUtility.singleLineHeight * 2f;
+        listRect.height -= EditorGUIUtility.singleLineHeight * 2f;
+        listRect.position += new Vector2(0f, EditorGUIUtility.singleLineHeight * 1f);
 
+        EditorGUI.LabelField(labelRect, label);
         _list.DoList(listRect);
+        EditorGUI.PropertyField(toggleRect, property.FindPropertyRelative(nameof(ReMultiTag.RequireAll)));
 
         HandleDragAndDrop();
 

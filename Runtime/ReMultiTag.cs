@@ -4,6 +4,7 @@
 public struct ReMultiTag
 {
     public List<ReTag> Tags;
+    public bool RequireAll;
 
     public static implicit operator ReMultiTag(List<ReTag> from)
     {

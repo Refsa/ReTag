@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [DefaultExecutionOrder(-1000)]
 public class ReTags : MonoBehaviour
 {
     [SerializeField] ReMultiTag tags;
-    
+
     HashSet<ReTagIdentifier> cachedTags;
 
     void Awake()
@@ -36,4 +37,16 @@ public class ReTags : MonoBehaviour
     public bool HasTag(ReTag tag) => cachedTags.Contains(tag.GetTag);
     public bool SetTag(ReTag tag) => cachedTags.Add(tag.GetTag);
     public bool RemoveTag(ReTag tag) => cachedTags.Remove(tag.GetTag);
+
+    public bool HasTags(ReMultiTag tags)
+    {
+        if (tags.RequireAll)
+        {
+            return tags.Tags.TrueForAll(e => HasTag(e));
+        }
+        else
+        {
+            return tags.Tags.Any(e => HasTag(e));
+        }
+    }
 }
