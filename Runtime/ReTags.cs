@@ -40,6 +40,10 @@ public class ReTags : MonoBehaviour
 
     public bool HasTags(ReMultiTag tags)
     {
+        if (tags.Tags.Count == 0)
+        {
+            return true;
+        }
         if (tags.RequireAll)
         {
             return tags.Tags.TrueForAll(e => HasTag(e));
